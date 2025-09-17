@@ -5,6 +5,7 @@ import json
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 from datetime import date, timedelta
+import os
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
@@ -118,8 +119,9 @@ def main():
                         prog_bar.update(1)
 
         id_list = list(dict.fromkeys(id_list))
+        id_list.append(2024)
 
-    with open(f'all_event_ids.json', 'w') as ids_file:
+    with open(os.path.join('data', 'all_event_ids.json'), 'w') as ids_file:
         json.dump(leagues, ids_file)
 
 
