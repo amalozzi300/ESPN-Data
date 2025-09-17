@@ -119,7 +119,6 @@ def main():
                         prog_bar.update(1)
 
         id_list = list(dict.fromkeys(id_list))
-        id_list.append(2024)
 
     with open(os.path.join('data', 'all_event_ids.json'), 'w') as ids_file:
         json.dump(leagues, ids_file)
