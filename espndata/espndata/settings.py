@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # custom applications
-    'espndata.eventdata.apps.EventdataConfig'
+    'espndata.eventdata.apps.EventdataConfig',
+    'espndata.utils.apps.UtilsConfig',
 ]
 
 MIDDLEWARE = [
