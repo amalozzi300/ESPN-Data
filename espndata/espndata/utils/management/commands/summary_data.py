@@ -29,110 +29,130 @@ class Command(BaseCommand):
             'nba': set(),
             'mlb': set(),
         }
+        new_events = []
+        existing_league_id_pairs = set(Event.objects.values_list('league', 'espn_id'))
         base_espn_api_url = 'https://site.api.espn.com/apis/site/v2/sports/{sport}/{league}/summary'
         ids_file_path = settings.BASE_DIR / 'espndata' / '_raw_data' / 'all_event_ids.json'
         
         with open(ids_file_path, 'r') as ids_file:
             ids_by_league = json.load(ids_file)
 
-        # total_games = sum([len(league_ids) for league_ids in ids_by_league.values()])
-        total_games = 4
-        new_events = []
+        total_games = sum([len(league_ids) for league_ids in ids_by_league.values()])
 
         with tqdm(total=total_games, desc='Fetching and Parsing event summaries') as prog_bar:
             for league, ids_list in ids_by_league.items():
                 sport = league_sport_map[league]
                 formatted_url = base_espn_api_url.format(sport=sport, league=league)
-                ids_list = [ids_list[798]]
                 
                 for espn_id in ids_list:
-                    params = {'event': espn_id}
-                    event_summary = self.request_with_retry(formatted_url, params).json()
+                    pair = (league, espn_id)
 
-                    header_info = event_summary.get('header', {})
-                    season_info = header_info.get('season')
-                    if not season_info:
-                        incomplete_event_data[league].add(espn_id)
-                        continue
-                    
-                    season_type = season_info.get('type')
-                    if season_type == 1:
-                        continue        # ignore pre-season events
-                    
-                    season_year = season_info.get('year')
-                    week = header_info.get('week')
+                    if pair not in existing_league_id_pairs:
+                        params = {'event': espn_id}
+                        event_summary = self.request_with_retry(formatted_url, params).json()
 
-                    comp = next(iter(header_info.get('competitions', [])))
-                    if not comp:
-                        incomplete_event_data[league].add(espn_id)
-                        continue
-                    
-                    event_status = comp.get('status', {}).get('type', {}).get('id')
-                    if event_status == '5' or event_status == '6':
-                        continue        # ignore postponed or cancelled events
-                    
-                    event_date = comp.get('date')
-                    event_date = dateparser.parse(event_date)
+                        header_info = event_summary.get('header', {})
+                        season_info = header_info.get('season')
+                        if not season_info:
+                            incomplete_event_data[league].add(espn_id)
+                            continue
+                        
+                        season_type = season_info.get('type')
+                        if season_type == 1:
+                            continue        # ignore pre-season events
+                        
+                        season_year = season_info.get('year')
+                        week = header_info.get('week')
 
-                    teams = comp.get('competitors', [])
-                    home = next((t for t in teams if t.get('homeAway') == 'home'), None)
-                    away = next((t for t in teams if t.get('homeAway') == 'away'), None)
-                    if not (home and away):
-                        incomplete_event_data[league].add(espn_id)
-                        continue
-                    
-                    home_team = home.get('team', {}).get('displayName')
-                    home_rank = home.get('rank')
-                    is_home_win = home.get('winner', False)
-                    away_team = away.get('team', {}).get('displayName')
-                    away_rank = away.get('rank')
-                    is_away_win = away.get('winner', False)
-                    both_ranked_matchup = bool(home_rank and away_rank)
-                    one_ranked_matchup = bool(home_rank) != bool(away_rank)
-                    neutral_site = comp.get('neutralSite', False)
+                        comp = next(iter(header_info.get('competitions', [])))
+                        if not comp:
+                            incomplete_event_data[league].add(espn_id)
+                            continue
+                        
+                        event_status = comp.get('status', {}).get('type', {}).get('id')
+                        if event_status == '5' or event_status == '6':
+                            continue        # ignore postponed or cancelled events
+                        
+                        event_date = comp.get('date')
+                        event_date = dateparser.parse(event_date)
 
-                    win_probs = event_summary.get('winprobability', [])
-                    pre_win_probs = next(iter(win_probs), {})
-                    if not pre_win_probs:
-                        incomplete_event_data[league].add(espn_id)
-                        continue
-                    
-                    home_win_prob = pre_win_probs.get('homeWinPercentage') * 100
-                    away_win_prob = 100 - home_win_prob
+                        teams = comp.get('competitors', [])
+                        home = next((t for t in teams if t.get('homeAway') == 'home'), None)
+                        away = next((t for t in teams if t.get('homeAway') == 'away'), None)
+                        if not (home and away):
+                            incomplete_event_data[league].add(espn_id)
+                            continue
+                        
+                        home_team = home.get('team', {}).get('displayName')
+                        home_rank = home.get('rank')
+                        is_home_win = home.get('winner', False)
+                        away_team = away.get('team', {}).get('displayName')
+                        away_rank = away.get('rank')
+                        is_away_win = away.get('winner', False)
+                        both_ranked_matchup = bool(home_rank and away_rank)
+                        one_ranked_matchup = bool(home_rank) != bool(away_rank)
+                        neutral_site = comp.get('neutralSite', False)
 
-                    betting_data = next(iter(event_summary.get('pickcenter', [])), {})
-                    home_american_ml = betting_data.get('homeTeamOdds', {}).get('moneyLine')
-                    home_decimal_ml = convert_to_decimal(home_american_ml)
-                    away_american_ml = betting_data.get('awayTeamOdds', {}).get('moneyLine')
-                    away_decimal_ml = convert_to_decimal(away_american_ml)
+                        win_probs = event_summary.get('winprobability', [])
+                        pre_win_probs = next(iter(win_probs), {})
+                        if not pre_win_probs:
+                            incomplete_event_data[league].add(espn_id)
+                            continue
+                        
+                        home_win_prob = pre_win_probs.get('homeWinPercentage') * 100
+                        away_win_prob = 100 - home_win_prob
 
-                    event = Event(
-                        league=league,
-                        espn_id=espn_id,
-                        date=event_date,
-                        season=season_year,
-                        week=week,
-                        season_type=season_type,
-                        home_team=home_team,
-                        home_rank=home_rank,
-                        home_win_probability=home_win_prob,
-                        home_moneyline=home_decimal_ml,
-                        is_home_win=is_home_win,
-                        away_team=away_team,
-                        away_rank=away_rank,
-                        away_win_probability=away_win_prob,
-                        away_moneyline=away_decimal_ml,
-                        is_away_win=is_away_win,
-                        is_neutral_site=neutral_site,
-                        both_ranked_matchup=both_ranked_matchup,
-                        one_ranked_matchup=one_ranked_matchup,
-                    )
-                    new_events.append(event)
+                        betting_data = next(iter(event_summary.get('pickcenter', [])), {})
+                        home_american_ml = betting_data.get('homeTeamOdds', {}).get('moneyLine')
+                        home_decimal_ml = convert_to_decimal(home_american_ml)
+                        away_american_ml = betting_data.get('awayTeamOdds', {}).get('moneyLine')
+                        away_decimal_ml = convert_to_decimal(away_american_ml)
+
+                        new_events.append(
+                            Event(
+                                league=league,
+                                espn_id=espn_id,
+                                date=event_date,
+                                season=season_year,
+                                week=week,
+                                season_type=season_type,
+                                home_team=home_team,
+                                home_rank=home_rank,
+                                home_win_probability=home_win_prob,
+                                home_moneyline=home_decimal_ml,
+                                is_home_win=is_home_win,
+                                away_team=away_team,
+                                away_rank=away_rank,
+                                away_win_probability=away_win_prob,
+                                away_moneyline=away_decimal_ml,
+                                is_away_win=is_away_win,
+                                is_neutral_site=neutral_site,
+                                both_ranked_matchup=both_ranked_matchup,
+                                one_ranked_matchup=one_ranked_matchup,                                
+                            ),
+                        )
+
+                        existing_league_id_pairs.add(pair)
+
+                    time.sleep(0.5)
+                    prog_bar.update(1)
 
         Event.objects.bulk_create(new_events)
+        logging.info(f'{len(new_events)} successfully added to the database')
 
-        # write list of incomplete data events to a file
-        # clear current all_event_ids json for future use
+        with open('incomplete_data_events.json', 'w') as incomplete_file:
+            json.dump(incomplete_event_data, incomplete_file)
+
+        with open(ids_file_path, 'w') as ids_file:
+            json.dump(
+                {
+                    'college-football': [],
+                    'nfl': [],
+                    'nba': [],
+                    'mlb': [],
+                },
+                ids_file,
+            )
     
     def request_with_retry(self, url, params):
         """ 
