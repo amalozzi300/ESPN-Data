@@ -40,3 +40,7 @@ class Event(models.Model):
                 name='unique_league_event_id_combination',
             )
         ]
+        ordering = ['league', '-espn_id']
+
+    def __str__(self):
+        return f'{self.get_league_display()} - {self.espn_id}'
