@@ -1,3 +1,5 @@
 from django.contrib import admin
 
-# Register your models here.
+from espndata.eventdata.models import Event
+
+admin.site.register(Event)
