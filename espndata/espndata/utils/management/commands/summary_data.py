@@ -24,17 +24,17 @@ class Command(BaseCommand):
             'mlb': 'baseball',
         }
         incomplete_event_data = {
-            'college-football': set(),
-            'nfl': set(),
-            'nba': set(),
-            'mlb': set(),
+            'college-football': {},
+            'nfl': {},
+            'nba': {},
+            'mlb': {},
         }
         new_events = []
         existing_league_id_pairs = set(Event.objects.values_list('league', 'espn_id'))
         base_espn_api_url = 'https://site.api.espn.com/apis/site/v2/sports/{sport}/{league}/summary'
-        ids_file_path = settings.BASE_DIR / 'espndata' / '_raw_data' / 'all_event_ids.json'
+        raw_data_filepath = settings.BASE_DIR / 'espndata' / '_raw_data'
         
-        with open(ids_file_path, 'r') as ids_file:
+        with open(raw_data_filepath / 'event_ids.json', 'r') as ids_file:
             ids_by_league = json.load(ids_file)
 
         for league, ids_list in ids_by_league.items():
@@ -51,7 +51,7 @@ class Command(BaseCommand):
                     header_info = event_summary.get('header', {})
                     season_info = header_info.get('season')
                     if not season_info:
-                        incomplete_event_data[league].add(espn_id)
+                        incomplete_event_data[league].update({espn_id: 'season/header'})
                         continue
                     
                     season_type = season_info.get('type')
@@ -63,7 +63,7 @@ class Command(BaseCommand):
 
                     comp = next(iter(header_info.get('competitions', [])))
                     if not comp:
-                        incomplete_event_data[league].add(espn_id)
+                        incomplete_event_data[league].update({espn_id: 'competition'})
                         continue
                     
                     event_status = comp.get('status', {}).get('type', {}).get('id')
@@ -77,7 +77,7 @@ class Command(BaseCommand):
                     home = next((t for t in teams if t.get('homeAway') == 'home'), None)
                     away = next((t for t in teams if t.get('homeAway') == 'away'), None)
                     if not (home and away):
-                        incomplete_event_data[league].add(espn_id)
+                        incomplete_event_data[league].update({espn_id: 'home/away'})
                         continue
                     
                     home_team = home.get('team', {}).get('displayName')
@@ -93,7 +93,7 @@ class Command(BaseCommand):
                     win_probs = event_summary.get('winprobability', [])
                     pre_win_probs = next(iter(win_probs), {})
                     if not pre_win_probs:
-                        incomplete_event_data[league].add(espn_id)
+                        incomplete_event_data[league].update({espn_id: 'win probs'})
                         continue
                     
                     home_win_prob = pre_win_probs.get('homeWinPercentage') * 100
@@ -136,12 +136,10 @@ class Command(BaseCommand):
         Event.objects.bulk_create(new_events)
         logging.info(f'{len(new_events)} successfully added to the database')
 
-        incomplete_event_data = {lg: list(ids) for lg, ids in incomplete_event_data.items()}
-
-        with open('incomplete_data_events.json', 'w') as incomplete_file:
+        with open(raw_data_filepath / 'incomplete_data_events.json', 'w') as incomplete_file:
             json.dump(incomplete_event_data, incomplete_file)
 
-        with open(ids_file_path, 'w') as ids_file:
+        with open(raw_data_filepath / 'event_ids.json', 'w') as ids_file:
             json.dump(
                 {
                     'college-football': [],
