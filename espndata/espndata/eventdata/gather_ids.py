@@ -39,7 +39,8 @@ def get_espn_scoreboard_url(league, year=None, week=None, date_str=None):
     Also returns a pre-built logging string to be used when the HTTP request is made.
     """
     if league == 'nfl' or league == 'college-football':
-        specifiers = f'_/week/{week}/year/{year}/seasontype/2'
+        # specifiers = f'_/week/{week}/year/{year}/seasontype/2'
+        specifiers = f'_/week/{week}/year/{year}/seasontype/3'
 
         if league == 'college-football':
             specifiers += '/group/80'
@@ -71,18 +72,25 @@ def main():
 
     for league, id_list in leagues.items():
         if league == 'nfl' or league == 'college-football':
-            # YEARS = [2017, 2018, 2019, 2022, 2023, 2024]
-            YEARS = [2025]
+            YEARS = [2017, 2018, 2019, 2022, 2023, 2024]
+            # YEARS = [2025]
             # WEEK_RANGE = range(20)      # ensures all weeks are included -- non-existant week scoreboards exist with no game data
+            YEARS = []
+            WEEK_RANGE = []
 
-            if league == 'college-football':
-                WEEK_RANGE = range(4)
-            elif league == 'nfl':
-                WEEK_RANGE = range(3)
+            # if league == 'college-football':
+            #     # WEEK_RANGE = range(4)
+            #     YEARS = [2024]
+            #     WEEK_RANGE = [998]
+            # elif league == 'nfl':
+            #     # WEEK_RANGE = range(3)
+            #     WEEK_RANGE = [0, 1, 2, 4]
+
 
             with tqdm(total=len(YEARS) * len(WEEK_RANGE), desc=f'Processing {league} Scoreboards') as prog_bar:
                 for year in YEARS:
                     for week in WEEK_RANGE:
+                        # scoreboard_url = get_espn_scoreboard_url(league, year=year, week=week)
                         scoreboard_url = get_espn_scoreboard_url(league, year=year, week=week + 1)
                         scoreboard = request_with_retry(scoreboard_url)
                         id_list.extend(get_event_ids_from_scoreboard(scoreboard))
@@ -104,7 +112,8 @@ def main():
                     # [date(2022, 4, 7), date(2022, 11, 10)],
                     # [date(2023, 3, 30), date(2023, 11, 5)],
                     # [date(2024, 3, 20), date(2024, 11, 1)],
-                    [date(2025, 3, 18), date(2025, 9, 21)],
+                    # [date(2025, 3, 18), date(2025, 9, 21)],
+                    [date(2025, 9, 22), date(2025, 9, 23)],
                 ]
 
             season_lengths = [d[1] - d[0] for d in season_start_end_dates]
