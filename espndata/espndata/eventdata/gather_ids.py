@@ -72,7 +72,7 @@ def main():
 
     for league, id_list in leagues.items():
         if league == 'nfl' or league == 'college-football':
-            YEARS = [2017, 2018, 2019, 2022, 2023, 2024]
+            # YEARS = [2017, 2018, 2019, 2022, 2023, 2024]
             # YEARS = [2025]
             # WEEK_RANGE = range(20)      # ensures all weeks are included -- non-existant week scoreboards exist with no game data
             YEARS = []
@@ -113,7 +113,8 @@ def main():
                     # [date(2023, 3, 30), date(2023, 11, 5)],
                     # [date(2024, 3, 20), date(2024, 11, 1)],
                     # [date(2025, 3, 18), date(2025, 9, 21)],
-                    [date(2025, 9, 22), date(2025, 9, 23)],
+                    # [date(2025, 9, 22), date(2025, 9, 23)],
+                    [date(2025, 9, 23), date(2025, 9, 24)],
                 ]
 
             season_lengths = [d[1] - d[0] for d in season_start_end_dates]
