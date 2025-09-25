@@ -35,12 +35,19 @@ def forward(apps, schema_editor):
             opponent_rank=event.home_rank,
         )
 
+        if home_team_prediction.is_winner:
+            event.winning_team = home_team_prediction.team_name
+        elif away_team_prediction.is_winner:
+            event.winning_team = away_team_prediction.team_name
+
+        event.save()
+
 def backward(apps, schema_editor):
     pass
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('eventdata', '0002_alter_event_options_teamprediction'),
+        ('eventdata', '0002_alter_event_options_event_winning_team_and_more'),
     ]
 
     operations = [

@@ -29,6 +29,7 @@ class Event(models.Model):
     away_win_probability = models.DecimalField(max_digits=5, decimal_places=2)  # remove
     away_moneyline = models.DecimalField(max_digits=10, decimal_places=4, null=True)    # remove
     is_away_win = models.BooleanField(default=False)    # remove
+    winning_team = models.CharField(max_length=128, null=True, blank=True)
     is_neutral_site = models.BooleanField(default=False)
     both_ranked_matchup = models.BooleanField(default=False)
     one_ranked_matchup = models.BooleanField(default=False)
