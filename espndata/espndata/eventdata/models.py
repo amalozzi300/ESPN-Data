@@ -19,16 +19,6 @@ class Event(models.Model):
     season = models.IntegerField()
     week = models.IntegerField(null=True)
     season_type = models.IntegerField(choices=SEASON_TYPE_CHOICES)
-    home_team = models.CharField(max_length=128)    # remove
-    home_rank = models.IntegerField(null=True)      # remove
-    home_win_probability = models.DecimalField(max_digits=5, decimal_places=2)  # remove
-    home_moneyline = models.DecimalField(max_digits=10, decimal_places=4, null=True)    # remove
-    is_home_win = models.BooleanField(default=False)    # remove
-    away_team = models.CharField(max_length=128)    # remove
-    away_rank = models.IntegerField(null=True)  # remove
-    away_win_probability = models.DecimalField(max_digits=5, decimal_places=2)  # remove
-    away_moneyline = models.DecimalField(max_digits=10, decimal_places=4, null=True)    # remove
-    is_away_win = models.BooleanField(default=False)    # remove
     winning_team = models.CharField(max_length=128, null=True, blank=True)
     is_neutral_site = models.BooleanField(default=False)
     both_ranked_matchup = models.BooleanField(default=False)
