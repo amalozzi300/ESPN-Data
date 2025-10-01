@@ -1,6 +1,6 @@
-def convert_to_decimal(american):
+def american_to_decimal(american):
     """ 
-    Converts American format betting odds to decimal form.
+    Converts American formatted betting odds to decimal formatted betting odds.
     """
     if american is None:
         return american

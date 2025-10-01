@@ -9,7 +9,7 @@ import time
 from tqdm import tqdm
 
 from espndata.eventdata.models import Event
-from espndata.utils import convert_to_decimal
+from espndata.utils import american_to_decimal
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
@@ -101,9 +101,9 @@ class Command(BaseCommand):
 
                     betting_data = next(iter(event_summary.get('pickcenter', [])), {})
                     home_american_ml = betting_data.get('homeTeamOdds', {}).get('moneyLine')
-                    home_decimal_ml = convert_to_decimal(home_american_ml)
+                    home_decimal_ml = american_to_decimal(home_american_ml)
                     away_american_ml = betting_data.get('awayTeamOdds', {}).get('moneyLine')
-                    away_decimal_ml = convert_to_decimal(away_american_ml)
+                    away_decimal_ml = american_to_decimal(away_american_ml)
 
                     new_events.append(
                         Event(

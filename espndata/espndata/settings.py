@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # custom applications
     'espndata.eventdata.apps.EventdataConfig',
-    'espndata.utils.apps.UtilsConfig',
 ]
 
 MIDDLEWARE = [
