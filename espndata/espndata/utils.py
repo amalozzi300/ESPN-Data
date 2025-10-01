@@ -4,7 +4,10 @@ def american_to_decimal(american):
     """
     if american is None:
         return american
-    elif american > 0:
+    
+    american = int(american)
+
+    if american > 0:
         return (american / 100) + 1
     elif american < 0:
         return 1 - (100 / american)
