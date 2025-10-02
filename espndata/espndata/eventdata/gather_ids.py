@@ -5,7 +5,6 @@ import json
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 from datetime import date, timedelta
-import os
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
