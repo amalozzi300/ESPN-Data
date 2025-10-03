@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+from datetime import date
 from decouple import config
 from pathlib import Path
 
@@ -138,3 +139,34 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER')
 ADMIN_EMAIL = config('ADMIN_EMAIL')
+
+LEAGUE_DETAILS = {
+    'college-football': {
+        'sport': 'football',
+        'check_type': 'weekly',
+        'check_day': 0,     # Monday
+        'season_types': {
+            2: range(1, 17),
+            3: [999],
+        },
+        'season_start': date(2025, 9, 4),       # to be updated annually (check number of weeks for season_types, too)
+    },
+    'nfl': {
+        'sport': 'football',
+        'check_type': 'weekly',
+        'check_day': 1,     # Tuesday
+        'season_types': {
+            2: range(1, 19),
+            3: [1, 2, 3, 5],
+        },
+        'season_start': date(2025, 8, 23)       # to be updated annually (check number of weeks for season_types, too)
+    },
+    'nba': {
+        'sport': 'basketball',
+        'check_type': 'daily',
+    },
+    'mlb': {
+        'sport': 'baseball',
+        'check_type': 'daily',
+    }
+}

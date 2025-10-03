@@ -10,7 +10,7 @@ import requests
 import time
 from tqdm import tqdm
 
-from espndata.eventdata.models import Event
+from espndata.eventdata.models import Event, TeamPrediction
 from espndata.utils import american_to_decimal
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
@@ -18,12 +18,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(mess
 class Command(BaseCommand):
     help = 'TBD'
 
-    LEAGUE_SPORT_MAP = {
-        'college-football': 'football',
-        'nfl': 'football',
-        'nba': 'basketball',
-        'mlb': 'baseball',
-    }
+    LEAGUE_DETAILS = settings.LEAGUE_DETAILS
     INCOMPLETE_EVENT_DATA = {
         'college-football': {},
         'nfl': {},
@@ -32,7 +27,10 @@ class Command(BaseCommand):
     }
 
     def handle(self, *args, **options):
-        pass
+        today = date.today()
+
+        for league, details in self.LEAGUE_DETAILS:
+            pass
 
     def request_with_retry(self, url, params=None):
         """
