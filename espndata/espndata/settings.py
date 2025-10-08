@@ -140,6 +140,11 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER')
 ADMIN_EMAIL = config('ADMIN_EMAIL')
 
+# ESPN Links
+BASE_ESPN_SCOREBOARD_LINK = 'https://espn.com/{league}/scoreboard/{specifiers}'
+BASE_ESPN_EVENT_SUMMARY_LINK = 'https://site.api.espn.com/apis/site/v2/sports/{sport}/{league}/summary'
+
+# League Specific Information for Data Gathering
 LEAGUE_DETAILS = {
     'college-football': {
         'sport': 'football',
