@@ -60,7 +60,6 @@ def get_event_ids_from_scoreboard(scoreboard):
     return [game.get('id') for game in games]
 
 
-
 def main():
     leagues = {
         'college-football': [], 
