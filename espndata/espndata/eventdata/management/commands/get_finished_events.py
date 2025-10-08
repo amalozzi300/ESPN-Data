@@ -18,7 +18,13 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(mess
 class Command(BaseCommand):
     help = 'TBD'
 
-    LEAGUE_DETAILS = settings.LEAGUE_DETAILS
+    ESPN_EVENT_IDS = {
+        'college-football': [],
+        'nfl': [],
+        'nba': [],
+        'mlb': [],        
+    }
+
     INCOMPLETE_EVENT_DATA = {
         'college-football': {},
         'nfl': {},
@@ -28,9 +34,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         today = date.today()
+        weekday_index = today.weekday()
 
-        for league, details in self.LEAGUE_DETAILS:
-            pass
+        for league, details in settings.LEAGUE_DETAILS:
+            if details.get('check_type') == 'weekly' and details.get('check_day') != weekday_index:
+                # skips weekly checks if it's not the right day of the week to pull the data
+                continue
+
 
     def request_with_retry(self, url, params=None):
         """
