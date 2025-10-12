@@ -170,6 +170,10 @@ LEAGUE_DETAILS = {
         'sport': 'basketball',
         'check_type': 'daily',
     },
+    'wnba': {
+        'sport': 'basketball',
+        'check_type': 'daily',
+    },
     'mlb': {
         'sport': 'baseball',
         'check_type': 'daily',
