@@ -1,24 +1,14 @@
+from django.conf import settings
 from django.db import models
 
 
 class Event(models.Model):
-    LEAGUE_CHOICES = [
-        ('college-football', 'NCAAF'),
-        ('nfl', 'NFL'),
-        ('nba', 'NBA'),
-        ('mlb', 'MLB'),
-    ]
-    SEASON_TYPE_CHOICES = [
-        (2, 'Regular Season'),
-        (3, 'Post Season'),
-    ]
-
-    league = models.CharField(max_length=16, choices=LEAGUE_CHOICES)
+    league = models.CharField(max_length=16, choices=settings.LEAGUE_CHOICES)
     espn_id = models.CharField(max_length=24)
     date = models.DateField()
     season = models.IntegerField()
     week = models.IntegerField(null=True)
-    season_type = models.IntegerField(choices=SEASON_TYPE_CHOICES)
+    season_type = models.IntegerField(choices=settings.SEASON_TYPE_CHOICES)
     winning_team = models.CharField(max_length=128, null=True, blank=True)
     is_neutral_site = models.BooleanField(default=False)
     both_ranked_matchup = models.BooleanField(default=False)

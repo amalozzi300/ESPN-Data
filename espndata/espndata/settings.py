@@ -144,6 +144,18 @@ BASE_ESPN_SCOREBOARD_LINK = 'https://espn.com/{league}/scoreboard/{specifiers}'
 BASE_ESPN_EVENT_SUMMARY_LINK = 'https://site.api.espn.com/apis/site/v2/sports/{sport}/{league}/summary'
 
 # League Specific Information for Data Gathering
+# Run `makemigrations` and `migrate` when you change the _CHOICES dicts
+LEAGUE_CHOICES = [
+    ('college-football', 'NCAAF'),
+    ('nfl', 'NFL'),
+    ('nba', 'NBA'),
+    ('wnba', 'WNBA'),
+    ('mlb', 'MLB'),
+]
+SEASON_TYPE_CHOICES = [
+    (2, 'Regular Season'),
+    (3, 'Post Season'),
+]
 LEAGUE_DETAILS = {
     'college-football': {
         'sport': 'football',
