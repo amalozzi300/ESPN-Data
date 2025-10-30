@@ -143,7 +143,7 @@ class Command(BaseCommand):
 
         Event.objects.bulk_create(new_events)
         TeamPrediction.objects.bulk_create(new_team_predictions)
-        logging.info(f'{len(new_events)} successfully added to the database')
+        logging.info(f'{len(new_events)} Events and {len(new_team_predictions)} TeamPredictions successfully added to the database')
 
         with open(raw_data_filepath / 'incomplete_data_events.json', 'w') as incomplete_file:
             json.dump(incomplete_event_data, incomplete_file)
