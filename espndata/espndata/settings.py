@@ -165,7 +165,6 @@ LEAGUE_DETAILS = {
             2: range(1, 17),
             3: [999],
         },
-        'season_start': date(2025, 9, 4),       # to be updated annually (check number of weeks for season_types, too)
     },
     'nfl': {
         'sport': 'football',
@@ -175,7 +174,6 @@ LEAGUE_DETAILS = {
             2: range(1, 19),
             3: [1, 2, 3, 5],
         },
-        'season_start': date(2025, 8, 23)       # to be updated annually (check number of weeks for season_types, too)
     },
     'nba': {
         'sport': 'basketball',
