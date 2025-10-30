@@ -10,3 +10,6 @@ class DataCollectionState(models.Model):
     all_star_end = models.DateField()
     season_type = models.IntegerField(choices=settings.SEASON_TYPE_CHOICES)
     week = models.IntegerField()
+
+    def __str__(self):
+        return self.get_league_display()
