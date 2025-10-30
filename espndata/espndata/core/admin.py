@@ -1,3 +1,5 @@
 from django.contrib import admin
 
-# Register your models here.
+from espndata.core.models import DataCollectionState
+
+admin.site.register(DataCollectionState)
