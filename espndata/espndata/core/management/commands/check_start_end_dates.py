@@ -38,7 +38,7 @@ class Command(BaseCommand):
         if message:
             try:
                 send_mail(
-                    subject='',
+                    subject='ESPN Data - Update League Dates',
                     message=message,
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[settings.ADMIN_EMAIL],
