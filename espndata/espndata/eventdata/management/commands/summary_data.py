@@ -8,7 +8,7 @@ import requests
 import time
 from tqdm import tqdm
 
-from espndata.eventdata.models import Event
+from espndata.eventdata.models import Event, TeamPrediction
 from espndata.utils import american_to_decimal
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
@@ -17,19 +17,10 @@ class Command(BaseCommand):
     help = 'Uses stored ESPN event IDs to collect and parse ESPN event summaries.'
 
     def handle(self, *args, **options):
-        league_sport_map = {
-            'college-football': 'football',
-            'nfl': 'football',
-            'nba': 'basketball',
-            'mlb': 'baseball',
-        }
-        incomplete_event_data = {
-            'college-football': {},
-            'nfl': {},
-            'nba': {},
-            'mlb': {},
-        }
+        league_sport_map = {league: details['sport'] for league, details in settings.LEAGUE_DETAILS.items()}
+        incomplete_event_data = {league: {} for league in settings.LEAGUE_DETAILS.keys()}
         new_events = []
+        new_team_predictions = []
         existing_league_id_pairs = set(Event.objects.values_list('league', 'espn_id'))
         base_espn_api_url = 'https://site.api.espn.com/apis/site/v2/sports/{sport}/{league}/summary'
         raw_data_filepath = settings.BASE_DIR / 'espndata' / '_raw_data'
@@ -105,50 +96,60 @@ class Command(BaseCommand):
                     away_american_ml = betting_data.get('awayTeamOdds', {}).get('moneyLine')
                     away_decimal_ml = american_to_decimal(away_american_ml)
 
-                    new_events.append(
-                        Event(
-                            league=league,
-                            espn_id=espn_id,
-                            date=event_date,
-                            season=season_year,
-                            week=week,
-                            season_type=season_type,
-                            home_team=home_team,
-                            home_rank=home_rank,
-                            home_win_probability=home_win_prob,
-                            home_moneyline=home_decimal_ml,
-                            is_home_win=is_home_win,
-                            away_team=away_team,
-                            away_rank=away_rank,
-                            away_win_probability=away_win_prob,
-                            away_moneyline=away_decimal_ml,
-                            is_away_win=is_away_win,
-                            is_neutral_site=neutral_site,
-                            both_ranked_matchup=both_ranked_matchup,
-                            one_ranked_matchup=one_ranked_matchup,                                
-                        ),
+                    new_event = Event(
+                        league=league,
+                        espn_id=espn_id,
+                        date=event_date,
+                        season=season_year,
+                        week=week,
+                        season_type=season_type,
+                        is_neutral_site=neutral_site,
+                        both_ranked_matchup=both_ranked_matchup,
+                        one_ranked_matchup=one_ranked_matchup,
+                    )
+                    home_team_prediction = TeamPrediction(
+                        event=new_event,
+                        team_name=home_team,
+                        team_rank=home_rank,
+                        home_away='home' if not neutral_site else 'neutral',
+                        win_probability=home_win_prob,
+                        moneyline=home_decimal_ml,
+                        is_winner=is_home_win,
+                        opponent_name=away_team,
+                        opponent_rank=away_rank,
+                    )
+                    away_team_prediction = TeamPrediction(
+                        event=new_event,
+                        team_name=away_team,
+                        team_rank=away_rank,
+                        home_away='away' if not neutral_site else 'neutral',
+                        win_probability=away_win_prob,
+                        moneyline=away_decimal_ml,
+                        is_winner=is_away_win,
+                        opponent_name=home_team,
+                        opponent_rank=home_rank,
                     )
 
+                    if home_team_prediction.is_winner:
+                        new_event.winning_team = home_team
+                    elif away_team_prediction.is_winner:
+                        new_event.winning_team = away_team
+
+                    new_events.append(new_event)
+                    new_team_predictions += [home_team_prediction, away_team_prediction]
                     existing_league_id_pairs.add(pair)
 
                 time.sleep(0.5)
 
         Event.objects.bulk_create(new_events)
+        TeamPrediction.objects.bulk_create(new_team_predictions)
         logging.info(f'{len(new_events)} successfully added to the database')
 
         with open(raw_data_filepath / 'incomplete_data_events.json', 'w') as incomplete_file:
             json.dump(incomplete_event_data, incomplete_file)
 
         with open(raw_data_filepath / 'event_ids.json', 'w') as ids_file:
-            json.dump(
-                {
-                    'college-football': [],
-                    'nfl': [],
-                    'nba': [],
-                    'mlb': [],
-                },
-                ids_file,
-            )
+            json.dump({league: [] for league in settings.LEAGUE_DETAILS.keys()}, ids_file)
     
     def request_with_retry(self, url, params):
         """ 
