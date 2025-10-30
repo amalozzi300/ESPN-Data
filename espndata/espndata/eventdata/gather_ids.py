@@ -43,7 +43,7 @@ def get_espn_scoreboard_url(league, year=None, week=None, date_str=None):
 
         if league == 'college-football':
             specifiers += '/group/80'
-    elif league == 'nba' or league == 'mlb':
+    elif league == 'nba' or league == 'mlb' or league == 'wnba':
         specifiers = f'_/date/{date_str}'
 
     url = f'https://espn.com/{league}/scoreboard/{specifiers}'
@@ -62,10 +62,11 @@ def get_event_ids_from_scoreboard(scoreboard):
 
 def main():
     leagues = {
-        'college-football': [], 
-        'nfl': [], 
-        'nba': [], 
-        'mlb': [],
+        # 'college-football': [], 
+        # 'nfl': [], 
+        # 'nba': [],
+        'wnba': [],
+        # 'mlb': [],
     }
 
     for league, id_list in leagues.items():
@@ -94,7 +95,7 @@ def main():
                         id_list.extend(get_event_ids_from_scoreboard(scoreboard))
                         time.sleep(1)
                         prog_bar.update(1)
-        elif league == 'nba' or league == 'mlb':
+        elif league == 'nba' or league == 'mlb' or league == 'wnba':
             if league == 'nba':
                 season_start_end_dates = [
                     # [date(2017, 10, 17), date(2018, 6, 10)],
@@ -112,7 +113,18 @@ def main():
                     # [date(2024, 3, 20), date(2024, 11, 1)],
                     # [date(2025, 3, 18), date(2025, 9, 21)],
                     # [date(2025, 9, 22), date(2025, 9, 23)],
-                    [date(2025, 9, 23), date(2025, 9, 24)],
+                    # [date(2025, 9, 23), date(2025, 9, 24)],
+                ]
+            elif league == 'wnba':
+                season_start_end_dates = [
+                    [date(2022, 5, 6), date(2022, 7, 9)],
+                    [date(2022, 7, 11), date(2022, 9, 19)],
+                    [date(2023, 5, 19), date(2023, 7, 14)],
+                    [date(2023, 7, 16), date(2023, 10, 19)],
+                    [date(2024, 5, 14), date(2024, 7, 19)],
+                    [date(2024, 7, 21), date(2024, 10, 21)],
+                    [date(2025, 5, 16), date(2025, 7, 18)],
+                    [date(2025, 7, 20), date(2025, 10, 11)],
                 ]
 
             season_lengths = [d[1] - d[0] for d in season_start_end_dates]
