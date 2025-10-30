@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.core.mail import send_mail
 from django.core.management.base import BaseCommand
 
 from datetime import date
@@ -9,16 +11,39 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         today = date.today()
+
         message = ''
+        improperly_configured = 'The stored {league} season dates are not properly configured. Update them via the DataCollectionState object.\n'
 
         for state in DataCollectionState.objects.all():
-            if state.season_end <= state.season_start:
-                message += f'The stored {state.get_league_display()} season season dates are out of sync. Update them via the DataCollectionState object.'
-            if today > state.season_end:
-                message += f'The current {state.get_league_display()} season has ended. Relevant season dates stored in the DataCollectionState object should be updated.\n'
-            if state.all_star_start:
-                if (
-                    state.all_star_start > state.all_star_end
-                    or state.season_start > state.all_star_start
+            if state.all_star_start and state.all_star_end:
+                # order should always be seasonStart, allstarStart, allstarEnd, seasonEnd
+                if not (
+                    state.season_start < state.all_star_start
+                    and state.all_star_start <= state.all_star_end
+                    and state.all_star_end < state.season_end
                 ):
-                    message += f'The stored {state.get_league_display()} all star break dates are out of sync. Update them via the DataCollectionState object.'
+                    message += improperly_configured.format(state.get_league_display())
+            elif not state.all_star_start and not state.all_star_end:
+                # order should always be seasonStart, seasonEnd
+                if not state.season_start < state.season_end:
+                    message += improperly_configured.format(state.get_league_display())
+            else:
+                # must have both or neither all star dates, not just one
+                message += improperly_configured.format(state.get_league_display())
+
+            if today > state.season_end:
+                message += f'The current {state.get_league_display()} season has ended. Relevant season dates should be updated via the DataCollectionState object.\n'
+
+        if message:
+            try:
+                send_mail(
+                    subject='',
+                    message=message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[settings.ADMIN_EMAIL],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                # log the error
+                raise Exception
