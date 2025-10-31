@@ -11,7 +11,7 @@ from tqdm import tqdm
 from espndata.eventdata.models import Event, TeamPrediction
 from espndata.utils import american_to_decimal
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     help = 'Uses stored ESPN event IDs to collect and parse ESPN event summaries.'
@@ -22,7 +22,6 @@ class Command(BaseCommand):
         new_events = []
         new_team_predictions = []
         existing_league_id_pairs = set(Event.objects.values_list('league', 'espn_id'))
-        base_espn_api_url = 'https://site.api.espn.com/apis/site/v2/sports/{sport}/{league}/summary'
         raw_data_filepath = settings.BASE_DIR / 'espndata' / '_raw_data'
         
         with open(raw_data_filepath / 'event_ids.json', 'r') as ids_file:
@@ -30,7 +29,7 @@ class Command(BaseCommand):
 
         for league, ids_list in ids_by_league.items():
             sport = league_sport_map[league]
-            formatted_url = base_espn_api_url.format(sport=sport, league=league)
+            formatted_url = settings.BASE_ESPN_EVENT_SUMMARY_LINK.format(sport=sport, league=league)
             
             for espn_id in tqdm(ids_list, desc=f'Fetching and Parsing ESPN {league.title()} Game Summaries'):
                 pair = (league, espn_id)

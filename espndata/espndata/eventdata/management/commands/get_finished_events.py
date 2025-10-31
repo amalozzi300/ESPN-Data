@@ -13,7 +13,7 @@ from tqdm import tqdm
 from espndata.eventdata.models import Event, TeamPrediction
 from espndata.utils import american_to_decimal
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     help = 'TBD'

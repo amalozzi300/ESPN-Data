@@ -160,7 +160,8 @@ ADMIN_EMAIL = config('ADMIN_EMAIL')
 
 # ESPN Links
 BASE_ESPN_SCOREBOARD_LINK = 'https://espn.com/{league}/scoreboard/{specifiers}'
-BASE_ESPN_EVENT_SUMMARY_LINK = 'https://site.api.espn.com/apis/site/v2/sports/{sport}/{league}/summary'
+BASE_ESPN_SCOREBOARD_API_LINK = 'https://site.api.espn.com/apis/site/v2/sports/{sport}/{league}/scoreboard'
+BASE_ESPN_EVENT_SUMMARY_API_LINK = 'https://site.api.espn.com/apis/site/v2/sports/{sport}/{league}/summary'
 
 # League Specific Information for Data Gathering
 # Run `makemigrations` and `migrate` when you change the _CHOICES dicts
