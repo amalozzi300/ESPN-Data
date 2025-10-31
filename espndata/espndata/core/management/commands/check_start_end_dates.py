@@ -54,4 +54,4 @@ class Command(BaseCommand):
                 capture_exception(e)
                 logger.error(f'Email Failed: {e}')
 
-        logger.info('`check_start_end_dates` command finished.')
+        logger.info('`check_start_end_dates` command completed.')
