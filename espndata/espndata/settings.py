@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from datetime import date
 from decouple import config
 from pathlib import Path
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -128,6 +130,23 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = '/login/'
 LOGOUT_REDIRECT_URL = LOGIN_URL
+
+# Sentry configuration:
+SENTRY_DSN = config('SENTRY_DSN', default=None)
+
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        sample_rate=1.0,
+        enable_logs=True,
+        send_default_pii=False,
+        environment='development' if DEBUG else 'production',
+    )
+    print('Sentry Active')
+else:
+    print('Sentry DSN not found')
+
 
 # Email settings:
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

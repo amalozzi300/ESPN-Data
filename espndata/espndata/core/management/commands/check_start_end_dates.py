@@ -3,13 +3,19 @@ from django.core.mail import send_mail
 from django.core.management.base import BaseCommand
 
 from datetime import date
+import logging
+from sentry_sdk import capture_exception
 
 from espndata.core.models import DataCollectionState
+
+logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     help = 'Checks DataCollectionState objects season_start and season_end dates need to be updated. Sends an email to admins if any do.'
 
     def handle(self, *args, **options):
+        logger.info('`check_start_end_dates` command started.')
+
         today = date.today()
 
         message = ''
@@ -45,5 +51,7 @@ class Command(BaseCommand):
                     fail_silently=False,
                 )
             except Exception as e:
-                # log the error
-                raise Exception
+                capture_exception(e)
+                logger.error(f'Email Failed: {e}')
+
+        logger.info('`check_start_end_dates` command finished.')

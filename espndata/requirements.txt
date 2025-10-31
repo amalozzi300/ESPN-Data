@@ -6,4 +6,5 @@ python-dateutil
 python-decouple
 pytz
 requests
+sentry-sdk[django]
 tqdm
