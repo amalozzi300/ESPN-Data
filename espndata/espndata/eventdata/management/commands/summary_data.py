@@ -9,7 +9,7 @@ import time
 from tqdm import tqdm
 
 from espndata.eventdata.models import Event, TeamPrediction
-from espndata.utils import american_to_decimal
+from espndata.core.utils import american_to_decimal
 
 logger = logging.getLogger(__name__)
 
