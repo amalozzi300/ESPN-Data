@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.management import BaseCommand
 
-from datetime import timedelta
+from datetime import date, timedelta
 from dateutil import parser as dateparser
 import json
 import logging
@@ -10,6 +10,7 @@ import time
 from tqdm import tqdm
 
 from espndata.eventdata.models import Event, TeamPrediction
+from espndata.core.models import DataCollectionState
 from espndata.core.utils import american_to_decimal
 
 logger = logging.getLogger(__name__)
@@ -18,18 +19,81 @@ class Command(BaseCommand):
     help = ''
 
     def handle(self, *args, **options):
-        for league, details in settings.LEAGUE_DETAILS.items():
-            self.should_collect_today()
+        self.today = date.today()
+        self.yesterday = self.today - timedelta(days=1)
+
+        for league_state in DataCollectionState.objects.all():
+            should_collect = self.should_collect_today(league_state)
+
+            if should_collect:
+                pass
 
 
-    def should_collect_today(self, league, details, league_status):
-        yesterday = self.today - timedelta(days=1)
+    def should_collect_today(self, league_state):
+        """
+        Returns the params dictionary to be sent with the formatted URL to the `request_with_retry()` method.
+        If should collect today, returns a populated dictionary (truthy), else returns an empty dictionary (falsy).
+        """
+        if league_state.is_offseason and league_state.season_start > self.yesterday:
+            # currently offseason and new season not started
+            return {}
+        
+        details = settings.LEAGUE_DETAILS[league_state.league]
 
-        if details['check_type'] == 'weekly':
-            if league_status.season_type == 3 and league_status.week == max(details['season_type'][3]):
-                return yesterday <= league_status.season_start
+        if details['check_type'] == 'daily':
+            if self.yesterday >= league_state.season_start and self.yesterday <= league_state.season_end:
+                if not (self.yesterday >= league_state.all_star_start and self.yesterday <= league_state.all_star_end):
+                    # season active and not in all star break
+                    return {'date': self.yesterday.strftime('%Y%m%d')}
+            
+            return {}   # offseason or all star break
         else:
-            pass
+            if league_state.league == 'college-football':
+                if league_state.season_type == 2:
+                    if league_state.week != details['season_type'][2][-1]:
+                        # most recently collected week is not last week of regular season
+                        return {'season_type': 2, 'week': league_state.week + 1}
+                    else:
+                        if self.yesterday >= league_state.season_end:
+                            # postseason data cannot be collected until the season ends due to ESPN's structure
+                            return {'season_type': 3, 'week': details['season_type'][3][-1]}
+                        else:
+                            return {}
+                else:
+                    if self.yesterday >= league_state.start_date:
+                        # new season started
+                        return {'season_type': 2, 'week': details['season_type'][2][0]}
+                    else:
+                        return {}
+            elif league_state.league == 'nfl':
+                if league_state.season_type == 2:
+                    if league_state.week != details['season_type'][2][-1]:
+                        # most recently collected week is not last week of regular season
+                        return {'season_type': 2, 'week': league_state.week + 1}
+                    else:
+                        return {'season_type': 3, 'week': details['season_type'][3][0]}
+                else:
+                    if league_state.week != details['season_type'][3][-1]:
+                        # most recently collected week is not last week of post season
+                        if league_state.week + 1 in details['season_type'][3]:
+                            # current week is not Pro Bowl
+                            return {'season_type': 3, 'week': league_state.week + 1}
+                        else:
+                            # skip collection for Pro Bowl, but update DataCollectionState object
+                            league_state.week += 1
+                            league_state.collected = self.today
+                            league_state.save()
+
+                            return {}
+                    else:
+                        if self.yesterday >= league_state.start_date:
+                            # new season started
+                            return {'season_type': 2, 'week': details['season_type'][2][0]}
+                        else:
+                            return {}
+
+
+
 
     def request_with_retry(self, url, params):
         """ 
