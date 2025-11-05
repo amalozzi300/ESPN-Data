@@ -48,34 +48,38 @@ class Command(BaseCommand):
             
             return {}   # offseason or all star break
         else:
+            if details['check_day'] != self.today.weekday():
+                # weekly checks should only check on league's designated check day
+                return {}
+
             if league_state.league == 'college-football':
                 if league_state.season_type == 2:
-                    if league_state.week != details['season_type'][2][-1]:
+                    if league_state.week != details['season_types'][2][-1]:
                         # most recently collected week is not last week of regular season
                         return {'season_type': 2, 'week': league_state.week + 1}
                     else:
                         if self.yesterday >= league_state.season_end:
                             # postseason data cannot be collected until the season ends due to ESPN's structure
-                            return {'season_type': 3, 'week': details['season_type'][3][-1]}
+                            return {'season_type': 3, 'week': details['season_types'][3][-1]}
                         else:
                             return {}
                 else:
                     if self.yesterday >= league_state.start_date:
                         # new season started
-                        return {'season_type': 2, 'week': details['season_type'][2][0]}
+                        return {'season_type': 2, 'week': details['season_types'][2][0]}
                     else:
                         return {}
             elif league_state.league == 'nfl':
                 if league_state.season_type == 2:
-                    if league_state.week != details['season_type'][2][-1]:
+                    if league_state.week != details['season_types'][2][-1]:
                         # most recently collected week is not last week of regular season
                         return {'season_type': 2, 'week': league_state.week + 1}
                     else:
-                        return {'season_type': 3, 'week': details['season_type'][3][0]}
+                        return {'season_type': 3, 'week': details['season_types'][3][0]}
                 else:
-                    if league_state.week != details['season_type'][3][-1]:
+                    if league_state.week != details['season_types'][3][-1]:
                         # most recently collected week is not last week of post season
-                        if league_state.week + 1 in details['season_type'][3]:
+                        if league_state.week + 1 in details['season_types'][3]:
                             # current week is not Pro Bowl
                             return {'season_type': 3, 'week': league_state.week + 1}
                         else:
@@ -88,7 +92,7 @@ class Command(BaseCommand):
                     else:
                         if self.yesterday >= league_state.start_date:
                             # new season started
-                            return {'season_type': 2, 'week': details['season_type'][2][0]}
+                            return {'season_type': 2, 'week': details['season_types'][2][0]}
                         else:
                             return {}
 
