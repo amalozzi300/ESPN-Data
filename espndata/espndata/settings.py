@@ -180,7 +180,7 @@ LEAGUE_DETAILS = {
     'college-football': {
         'sport': 'football',
         'check_type': 'weekly',
-        'check_day': 1,     # Monday
+        'check_day': 1,     # Tuesday
         'season_types': {
             2: range(1, 17),
             3: [999],
