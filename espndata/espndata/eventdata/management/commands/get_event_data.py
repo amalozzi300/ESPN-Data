@@ -40,17 +40,13 @@ class Command(BaseCommand):
         Returns params dictionary to be sent with formatted URL to `request_with_retry()` method.
         If should collect today, returns populated dictionary (truthy), else returns empty dictionary (falsy).
         """
-        if self.yesterday > league_state.season_end:
-            # Safe to assume offseason -- likely, league dates have not been updated manually for DataCollectionState object yet
-            return {}
-
-        if league_state.is_offseason and self.yesterday < league_state.season_start:
-            # Is currently offseason and new season has not started
-            return {}
-        
         details = settings.LEAGUE_DETAILS[league_state.league]
 
         if details['check_type'] == 'daily':
+            if self.check_is_offseason(league_state):
+                # Offseason
+                return {}
+
             return self.check_collect_daily_league(league_state)
         else:
             if details['check_day'] != self.today.weekday():
@@ -112,11 +108,11 @@ class Command(BaseCommand):
                     return {}
             else:
                 # Last collected week WAS last week of postseason
-                if self.yesterday >= league_state.season_start:
-                    # New season started, gather first week of regular season
-                    return {'season_type': 2, 'week': season_types[2][0]}
-                
-                return {}   # New season NOT started, do not gather data
+                if self.check_is_offseason(league_state):
+                    # Offseason -- new season not started. Do not gather data
+                    return {}
+
+                return {'season_type': 2, 'week': season_types[2][0]}   # New season started. Gather first regular season week's data
 
     def check_collect_ncaaf(self, league_state, season_types):
         """
@@ -136,11 +132,27 @@ class Command(BaseCommand):
             return {}   # Postseason started but season not ended, cannot collect postseason data
         else:
             # Last collected WAS last week of postseason
-            if self.yesterday >= league_state.season_start:
-                # New season started, gather first week of regular season
-                return {'season_type': 2, 'week': season_types[2][0]}
-            
-            return {}   # New season NOT started, do not gather data
+            if self.check_is_offseason(league_state):
+                # Offseason -- new season not started. Do not gather data
+                return {}
+
+            return {'season_type': 2, 'week': season_types[2][0]}   # New season started. Gather first regular season week's data
+
+    def check_is_offseason(self, league_state):
+        """
+        Checks if passed league is currently in offseason.
+        Has checks for updated league dates and stale league dates (staleness is assumed to be short-term).
+        Returns True if offseason, else returns False.
+        """
+        if self.yesterday > league_state.season_end:
+            # Stale date check -- yesterday is after season end date, safe to assume offseason
+            return True
+
+        if league_state.is_offseason and self.yesterday < league_state.season_start:
+            # Updated dates -- offseason previously recorded as active, new season not started -- remains offseason
+            return True
+
+        return False    # Season is active
 
 
 
