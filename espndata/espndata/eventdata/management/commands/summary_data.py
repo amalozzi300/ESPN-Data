@@ -29,7 +29,7 @@ class Command(BaseCommand):
 
         for league, ids_list in ids_by_league.items():
             sport = league_sport_map[league]
-            formatted_url = settings.BASE_ESPN_EVENT_SUMMARY_LINK.format(sport=sport, league=league)
+            formatted_url = settings.BASE_ESPN_EVENT_SUMMARY_API_LINK.format(sport=sport, league=league)
             
             for espn_id in tqdm(ids_list, desc=f'Fetching and Parsing ESPN {league.title()} Game Summaries'):
                 pair = (league, espn_id)
