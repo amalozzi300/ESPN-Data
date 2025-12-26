@@ -176,6 +176,10 @@ SEASON_TYPE_CHOICES = [
     (2, 'Regular Season'),
     (3, 'Post Season'),
 ]
+CHECK_TYPE_CHOICES = [
+    ('weekly', 'Weekly'),
+    ('daily', 'Daily'),
+]
 LEAGUE_DETAILS = {
     'college-football': {
         'sport': 'football',

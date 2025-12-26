@@ -1,16 +1,11 @@
 from django.conf import settings
 from django.db import models
 
-CHECK_TYPE_CHOICES = (
-    ('weekly', 'Weekly'),
-    ('daily', 'Daily'),
-)
-
 class LeagueDetails(models.Model):
     league = models.CharField(max_length=16)
     league_display = models.CharField(max_length=16)
     sport = models.CharField(max_length=16)
-    check_type = models.CharField(max_length=8, choices=CHECK_TYPE_CHOICES)
+    check_type = models.CharField(max_length=8, choices=settings.CHECK_TYPE_CHOICES)
     check_day = models.IntegerField(null=True, blank=True)
     season_types = models.JSONField(default=dict, blank=True)
 
