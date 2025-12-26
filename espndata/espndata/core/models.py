@@ -14,12 +14,16 @@ class LeagueDetails(models.Model):
     sport = models.CharField(max_length=16)
     check_type = models.CharField(max_length=8, choices=settings.CHECK_TYPE_CHOICES)
     check_day = models.IntegerField(null=True, blank=True)
-    season_types = models.JSONField(default=dict, blank=True)
+    season_types_json = models.JSONField(default=dict, blank=True)
 
     @cached_property
     def league_display(self):
         league_names = LeagueNamePair.objects.get(league=self.league)
         return league_names.league_display
+
+    @property
+    def season_types(self):
+        return {int(s_type): week_list for s_type, week_list in self.season_types_json.items()}
 
     def __str__(self):
         return self.league_display
