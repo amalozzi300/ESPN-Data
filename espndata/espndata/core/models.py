@@ -1,5 +1,13 @@
 from django.conf import settings
 from django.db import models
+from django.utils.functional import cached_property
+
+class LeagueNamePair(models.Model):
+    league = models.CharField(max_length=16, unique=True)
+    league_display = models.CharField(max_length=16, unique=True)
+
+    def __str__(self):
+        return self.league_display
 
 class LeagueDetails(models.Model):
     league = models.CharField(max_length=16)
@@ -8,6 +16,11 @@ class LeagueDetails(models.Model):
     check_type = models.CharField(max_length=8, choices=settings.CHECK_TYPE_CHOICES)
     check_day = models.IntegerField(null=True, blank=True)
     season_types = models.JSONField(default=dict, blank=True)
+
+    @cached_property
+    def league_display(self):
+        league_names = LeagueNamePair.objects.get(league=self.league)
+        return league_names.league_display
 
     def __str__(self):
         return self.league_display
