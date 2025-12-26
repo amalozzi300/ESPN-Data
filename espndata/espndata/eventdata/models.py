@@ -3,7 +3,7 @@ from django.db import models
 
 
 class Event(models.Model):
-    league = models.CharField(max_length=16, choices=settings.LEAGUE_CHOICES)
+    league = models.CharField(max_length=16)
     espn_id = models.CharField(max_length=24)
     date = models.DateField()
     season = models.IntegerField()

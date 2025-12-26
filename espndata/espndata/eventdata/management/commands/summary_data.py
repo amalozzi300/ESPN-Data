@@ -9,6 +9,7 @@ import time
 from tqdm import tqdm
 
 from espndata.eventdata.models import Event, TeamPrediction
+from espndata.core.models import LeagueDetails
 from espndata.core.utils import american_to_decimal
 
 logger = logging.getLogger(__name__)
@@ -17,8 +18,9 @@ class Command(BaseCommand):
     help = 'Uses stored ESPN event IDs to collect and parse ESPN event summaries.'
 
     def handle(self, *args, **options):
-        league_sport_map = {league: details['sport'] for league, details in settings.LEAGUE_DETAILS.items()}
-        incomplete_event_data = {league: {} for league in settings.LEAGUE_DETAILS.keys()}
+        league_details = LeagueDetails.objects.all()
+        league_sport_map = {details.league: details.sport for details in league_details}
+        incomplete_event_data = {details.league: {} for details in league_details}
         new_events = []
         new_team_predictions = []
         existing_league_id_pairs = set(Event.objects.values_list('league', 'espn_id'))
@@ -148,7 +150,7 @@ class Command(BaseCommand):
             json.dump(incomplete_event_data, incomplete_file)
 
         with open(raw_data_filepath / 'event_ids.json', 'w') as ids_file:
-            json.dump({league: [] for league in settings.LEAGUE_DETAILS.keys()}, ids_file)
+            json.dump({details.league: [] for details in league_details}, ids_file)
     
     def request_with_retry(self, url, params):
         """ 

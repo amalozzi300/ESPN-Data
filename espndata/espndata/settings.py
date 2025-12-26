@@ -165,13 +165,6 @@ BASE_ESPN_EVENT_SUMMARY_API_LINK = 'https://site.api.espn.com/apis/site/v2/sport
 
 # League Specific Information for Data Gathering
 # Run `makemigrations` and `migrate` when you change the _CHOICES dicts
-LEAGUE_CHOICES = [
-    ('college-football', 'NCAAF'),
-    ('nfl', 'NFL'),
-    ('nba', 'NBA'),
-    ('wnba', 'WNBA'),
-    ('mlb', 'MLB'),
-]
 SEASON_TYPE_CHOICES = [
     (2, 'Regular Season'),
     (3, 'Post Season'),
@@ -180,35 +173,3 @@ CHECK_TYPE_CHOICES = [
     ('weekly', 'Weekly'),
     ('daily', 'Daily'),
 ]
-LEAGUE_DETAILS = {
-    'college-football': {
-        'sport': 'football',
-        'check_type': 'weekly',
-        'check_day': 1,     # Tuesday
-        'season_types': {
-            2: range(1, 17),
-            3: [999],
-        },
-    },
-    'nfl': {
-        'sport': 'football',
-        'check_type': 'weekly',
-        'check_day': 1,     # Tuesday
-        'season_types': {
-            2: range(1, 19),
-            3: [1, 2, 3, 5],
-        },
-    },
-    'nba': {
-        'sport': 'basketball',
-        'check_type': 'daily',
-    },
-    'wnba': {
-        'sport': 'basketball',
-        'check_type': 'daily',
-    },
-    'mlb': {
-        'sport': 'baseball',
-        'check_type': 'daily',
-    }
-}
