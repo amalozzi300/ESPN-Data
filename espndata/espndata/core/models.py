@@ -1,8 +1,24 @@
 from django.conf import settings
 from django.db import models
 
+CHECK_TYPE_CHOICES = (
+    ('weekly', 'Weekly'),
+    ('daily', 'Daily'),
+)
+
+class LeagueDetails(models.Model):
+    league = models.CharField(max_length=16)
+    league_display = models.CharField(max_length=16)
+    sport = models.CharField(max_length=16)
+    check_type = models.CharField(max_length=8, choices=CHECK_TYPE_CHOICES)
+    check_day = models.IntegerField(null=True, blank=True)
+    season_types = models.JSONField(default=dict, blank=True)
+
+    def __str__(self):
+        return self.league_display
+
 class DataCollectionState(models.Model):
-    league = models.CharField(max_length=16, choices=settings.LEAGUE_CHOICES)
+    league_details = models.OneToOneField(LeagueDetails, on_delete=models.CASCADE, related_name='data_collection_state')
     collected = models.DateField()
     season_start = models.DateField()
     season_end = models.DateField()
@@ -13,4 +29,4 @@ class DataCollectionState(models.Model):
     week = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
-        return self.get_league_display()
+        return self.league_details.league_display
