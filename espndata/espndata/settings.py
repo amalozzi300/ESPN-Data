@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # custom applications
+    'espndata.events.apps.EventsConfig',
+
     'espndata.eventdata.apps.EventdataConfig',
     'espndata.core.apps.CoreConfig',
 ]
