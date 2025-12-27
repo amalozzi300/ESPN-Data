@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     # custom applications
     'espndata.events.apps.EventsConfig',
 
-    'espndata.eventdata.apps.EventdataConfig',
+    # 'espndata.eventdata.apps.EventdataConfig',
     'espndata.core.apps.CoreConfig',
 ]
 
