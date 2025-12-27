@@ -1,5 +1,13 @@
 <h1>Homepage</h1>
 
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
 {% if request.user.is_authenticated %}
     <form action="{% url 'logout' %}" method="POST">
         {% csrf_token %}
@@ -7,5 +15,6 @@
         <button type="submit">Logout</button>
     </form>
 {% else %}
+    <a href="{% url 'register' %}">Register</a>
     <a href="{% url 'login' %}">Login</a>
 {% endif %}
