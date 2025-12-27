@@ -1,9 +1,13 @@
 from django.conf import settings
 from django.db import models
+from django.utils.functional import cached_property
+
+from espndata.core.models import League
 
 
 class Event(models.Model):
     league = models.CharField(max_length=16)
+    league_details = models.ForeignKey(League, on_delete=models.CASCADE, related_name='events')
     espn_id = models.CharField(max_length=24)
     date = models.DateField()
     season = models.IntegerField()
@@ -23,8 +27,15 @@ class Event(models.Model):
         ]
         ordering = ['league', '-espn_id']
 
+    @cached_property
+    def league_display(self):
+        from espndata.core.models import LeagueDetails
+
+        details = LeagueDetails.objects.get(league=self.league)
+        return details.league_display
+
     def __str__(self):
-        return f'{self.get_league_display()} - {self.espn_id}'
+        return f'{self.league_display} - {self.espn_id}'
 
 
 class TeamPrediction(models.Model):
@@ -76,3 +87,19 @@ class TeamPrediction(models.Model):
     @property
     def is_opponent_ranked(self):
         return self.opponent_rank is not None
+
+
+class DataCollectionState(models.Model):
+    league = models.OneToOneField(League, on_delete=models.CASCADE, related_name='data_collection_state')
+    collection_date = models.DateField()
+    season_start = models.DateField()
+    season_end = models.DateField()
+    is_offseason = models.BooleanField()
+    all_star_start = models.DateField(null=True, blank=True)
+    all_star_end = models.DateField(null=True, blank=True)
+    event_date = models.DateField(null=True, blank=True)
+    season_type = models.IntegerField(choices=settings.SEASON_TYPE_CHOICES)
+    week = models.IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return self.league_details.league_display
