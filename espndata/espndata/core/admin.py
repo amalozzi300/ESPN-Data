@@ -1,5 +1,5 @@
 from django.contrib import admin
 
-from espndata.core.models import League
+from espndata.core.models import LeagueDetails
 
-admin.site.register(League)
+admin.site.register(LeagueDetails)
