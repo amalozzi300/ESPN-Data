@@ -6,7 +6,7 @@
     </ul>
 {% endif %}
 
-<form action="{% url 'login' %}" method="POST">
+<form action="{% url 'login_user' %}" method="POST">
     {% csrf_token %}
 
     {{ form.as_p }}
@@ -14,4 +14,4 @@
     <button type="submit">Login</button>
 </form>
 
-<p>Don't have an account? <a href="{% url 'register' %}">Register</a></p>
+<p>Don't have an account? <a href="{% url 'register_user' %}">Register</a></p>

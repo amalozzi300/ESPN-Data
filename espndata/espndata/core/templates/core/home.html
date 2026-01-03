@@ -9,12 +9,12 @@
 {% endif %}
 
 {% if request.user.is_authenticated %}
-    <form action="{% url 'logout' %}" method="POST">
+    <form action="{% url 'logout_user' %}" method="POST">
         {% csrf_token %}
 
         <button type="submit">Logout</button>
     </form>
 {% else %}
-    <a href="{% url 'register' %}">Register</a>
-    <a href="{% url 'login' %}">Login</a>
+    <a href="{% url 'register_user' %}">Register</a>
+    <a href="{% url 'login_user' %}">Login</a>
 {% endif %}
