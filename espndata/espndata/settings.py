@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # custom applications
     'espndata.events.apps.EventsConfig',
+    'espndata.profiles.apps.ProfilesConfig',
 
     # 'espndata.eventdata.apps.EventdataConfig',
     'espndata.core.apps.CoreConfig',
