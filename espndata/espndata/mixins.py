@@ -1,23 +1,24 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.shortcuts import redirect
 
 
-class ApprovedProfileRequiredMixin(UserPassesTestMixin):
+class SuperuserRequiredMixin(UserPassesTestMixin):
     """  
-    Mixin for class-based views that require approved profile status.
+    Mixin for class-based views that require superuser status.
     """
     def test_func(self):
         """  
         Profile must be authenticated, active, and approved.
         """
-        profile = self.request.user
-
-        if not profile.is_authenticated or not profile.is_active:
-            return False
-        
-        return hasattr(profile, 'approval_status') and profile.approval_status == 'APPROVED'
+        return self.request.user.is_superuser
     
     def handle_no_permission(self):
-        messages.warning('Only approved users may access this page. If you are an approved user, please log in.')
+        messages.warning(self.request, 'Only site admins may access the requested page.')
 
-        return super().handle_no_permission()
+        referer = self.request.META.get('HTTP_REFERER')
+
+        if referer:
+            return redirect(referer)
+        
+        return redirect('home')
