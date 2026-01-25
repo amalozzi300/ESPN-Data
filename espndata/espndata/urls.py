@@ -2,8 +2,6 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
-    path('', include('espndata.profiles.urls')),
-
     path('', include('espndata.core.urls')),
     path('', include('espndata.events.urls')),
 
