@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
-from datetime import date
 from decouple import config
 from pathlib import Path
 import sentry_sdk
@@ -160,14 +159,3 @@ ADMIN_EMAIL = config('ADMIN_EMAIL')
 BASE_ESPN_SCOREBOARD_LINK = 'https://espn.com/{league}/scoreboard/{specifiers}'
 BASE_ESPN_SCOREBOARD_API_LINK = 'https://site.api.espn.com/apis/site/v2/sports/{sport}/{league}/scoreboard'
 BASE_ESPN_EVENT_SUMMARY_API_LINK = 'https://site.api.espn.com/apis/site/v2/sports/{sport}/{league}/summary'
-
-# League Specific Information for Data Gathering
-# Run `makemigrations` and `migrate` when you change the _CHOICES dicts
-SEASON_TYPE_CHOICES = [
-    (2, 'Regular Season'),
-    (3, 'Post Season'),
-]
-CHECK_TYPE_CHOICES = [
-    ('weekly', 'Weekly'),
-    ('daily', 'Daily'),
-]
