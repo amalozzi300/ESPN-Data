@@ -92,11 +92,6 @@ class TeamPrediction(models.Model):
 class DataCollectionState(models.Model):
     league = models.OneToOneField(League, on_delete=models.CASCADE, related_name='data_collection_state')
     collection_date = models.DateField()
-    season_start = models.DateField()
-    season_end = models.DateField()
-    is_offseason = models.BooleanField()
-    all_star_start = models.DateField(null=True, blank=True)
-    all_star_end = models.DateField(null=True, blank=True)
     event_date = models.DateField(null=True, blank=True)
     season_type = models.IntegerField(choices=settings.SEASON_TYPE_CHOICES)
     week = models.IntegerField(null=True, blank=True)
