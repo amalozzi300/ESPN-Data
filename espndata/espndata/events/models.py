@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.db import models
+from django.utils.functional import cached_property
 
 
 # Run `makemigrations` and `migrate` when you change the `_CHOICES` dicts
@@ -32,7 +33,7 @@ class League(models.Model):
     def __str__(self):
         return self.display_name
 
-    @property
+    @cached_property
     def season_types(self):
         return {int(s_type): week_list for s_type, week_list in self._season_types.items()}
 
